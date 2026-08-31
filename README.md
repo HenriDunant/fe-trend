@@ -1,17 +1,33 @@
-# Fuel Economy and Driving Range Trend
-When shopping for a new car, one of the most important factors is the vehicle's efficiency. Most modern vehicles are far more efficient than cars in years past, but some models outperform others. 
+# Introduction
+When shopping for a new car, one of the most important factors is the vehicle's efficiency. Most modern vehicles are far more efficient than cars in years past, but some models outperform others.
 
-This project contains the vehicle that Car and Driver Magazine, an American automotive enthusiast magazine tested in the last 10 years.
+This project contains the fuel economy trend data from Car and Driver Magazine, an American automotive enthusiast magazine tested in the last 5 years.
 
 Though some entries here may list MPGe figures—these "mpg equivalent" numbers apply only to plug-in hybrids.
 
-# Why I chose Car and Driver for the data?
+## Techstack used in this project
 
-I chose Car and Driver because it's a print and digital magazine covering the newest car offerings, showcasing car culture, and helping people shopping for a car by serving up unique brand of intelligence, independence, and irreverence in magazine business since 1955 and online for more than two decades and I found the review  balances the subjective with objective data and pulls no punches.
+| Tool                     | Purpose                            | Why I use it                                             |
+| ------------------------ | ---------------------------------- | -------------------------------------------------------- |
+| **VS Code**              | Main IDE                           | Write/run Python and manage all project file             |
+| **Python**               | Scraping + cleaning + calculations | Automates collecting and preparing hundreds of tests     |
+| **Requests**             | Download web pages                 | Simple free Python library for HTTP requests             |
+| **BeautifulSoup**        | Read webpage HTML                  | Helps extract data i.e. vehicle name and tested FE       |  
+| **Pandas**               | Clean/transform data               | Easier than manually processing rows and columns         |
+| **NumPy**                | Numerical support                  | Useful for calculations; Pandas uses it underneath       |
+| **SQL Server + SSMS**    | Permanent structured storage       | A database layer                                         |
+| **SQLAlchemy / pyodbc**  | Python for SQL Server connection   | Let Python insert cleaned data into SQL Server           |
+| **Power BI Desktop**     | Dashboard and visualization        | I'm on Windows                                           |
+| **Git + GitHub Desktop** | Version control                    | Track changes and publish this project                   |
+| **GitHub**               | Public portfolio repository        | Shows project documentations                             |
+
+## Data Source Information
+
+I chose Car and Driver because it's a print and digital magazine covering the newest car offeringsand helping people shopping for a car by serving up unique brand of intelligence, independence, and irreverence in magazine business since 1955 and online for more than two decades and I found the review balances the subjective with objective data.
 
 ## How Car and Driver tests Fuel Economy and Driving Range from their cars
 
-Source : https://www.caranddriver.com/features/a32018270/how-we-test-cars/
+**Source : https://www.caranddriver.com/features/a32018270/how-we-test-cars/**
 
 All light-duty vehicles are required by law to have their fuel-economy estimates certified by the U.S. Environmental Protection Agency (EPA). These city, highway, and combined ratings are boldly listed on new vehicles' window stickers and often used by manufacturers as advertisement fodder. Plug-in hybrids and electric vehicles also receive estimates for electric operation. Expressed in MPGe, these estimates are intended to be an easy way to compare the efficiency of an electric to a gasoline-powered car on an energy-equivalent basis. But there is a drawback to using EPA numbers that few people realize: the agency actually does very few of its own tests. 
 
