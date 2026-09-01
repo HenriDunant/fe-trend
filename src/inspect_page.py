@@ -1,3 +1,10 @@
+from model_parser import (
+    load_model_reference,
+    extract_model_trim,
+)
+
+from vehicle_parser import extract_vehicle_identity
+
 from article_parser import extract_article_metadata
 
 import sys
@@ -77,16 +84,6 @@ fuel_data = extract_fuel_economy(
 )
 
 
-article_data = extract_article_metadata(
-    soup,
-    url
-)
-
-vehicle_record = {
-    **article_data,
-    **fuel_data,
-}
-
 # -------------------------------------------------
 # Display results
 
@@ -108,6 +105,25 @@ print("\n--- ARTICLE DATA ---")
 
 for key, value in article_data.items():
     print(key, "=", value)
+
+vehicle_identity = extract_vehicle_identity(
+    article_data["vehicle_name"]
+)
+
+model_reference = load_model_reference()
+
+model_data = extract_model_trim(
+    vehicle_identity["make"],
+    vehicle_identity["model_trim"],
+    model_reference,
+)
+
+vehicle_record = {
+    **article_data,
+    **vehicle_identity,
+    **model_data,
+    **fuel_data,
+}
 
 print("\n--- COMPLETE VEHICLE RECORD ---")
 
