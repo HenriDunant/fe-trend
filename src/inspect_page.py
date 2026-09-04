@@ -1,3 +1,5 @@
+from conversions import add_metric_conversions
+
 from model_parser import (
     load_model_reference,
     extract_model_trim,
@@ -13,6 +15,8 @@ import requests
 from bs4 import BeautifulSoup
 
 from fuel_parser import extract_fuel_economy
+
+import pandas as pd
 
 # -------------------------------------------------
 # Extract URL from the terminal
@@ -125,7 +129,28 @@ vehicle_record = {
     **fuel_data,
 }
 
+metric_data = add_metric_conversions(
+    vehicle_record
+)
+
+vehicle_record = {
+    **vehicle_record,
+    **metric_data,
+}
+
 print("\n--- COMPLETE VEHICLE RECORD ---")
 
 for key, value in vehicle_record.items():
     print(key, "=", value)
+
+df = pd.DataFrame([vehicle_record])
+
+print("\n--- DATAFRAME ---")
+print(df.to_string(index=False))
+
+df.to_csv(
+    "data/processed/test_vehicle.csv",
+    index=False
+)
+
+print("\nSaved: data/processed/test_vehicle.csv")
