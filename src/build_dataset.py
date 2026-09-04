@@ -13,6 +13,7 @@ urls = [
     "https://www.caranddriver.com/reviews/a73308571/2027-rivian-r2-performance-awd-launch-edition-test/",
     "https://www.caranddriver.com/reviews/a71430685/2025-porsche-911-carrera-4-gts-cabriolet-test/",
     "https://www.caranddriver.com/reviews/a73347571/2026-toyota-rav4-gr-sport-plug-in-hybrid-test/",
+    "https://www.caranddriver.com/reviews/a70303382/2026-porsche-macan-gts-ev-drive/"
 ]
 
 
@@ -20,102 +21,111 @@ model_reference = load_model_reference()
 
 records = []
 
+errors = []
 
 for url in urls:
 
     print("Processing:", url)
 
-    response = requests.get(
-        url,
-        timeout=30
-    )
+    try:
+        response = requests.get(
+            url,
+            timeout=30
+        )
 
-    response.raise_for_status()
+        response.raise_for_status()
 
-    soup = BeautifulSoup(
-        response.text,
-        "html.parser"
-    )
+        soup = BeautifulSoup(
+            response.text,
+            "html.parser"
+        )
 
-    page_text = soup.get_text(
-        " ",
-        strip=True
-    )
+        page_text = soup.get_text(
+            " ",
+            strip=True
+        )
 
-    # Article metadata
-    article_data = extract_article_metadata(
-        soup,
-        url
-    )
+        article_data = extract_article_metadata(
+            soup,
+            url
+        )
 
-    # Locate fuel economy sections
-    cd_start = page_text.find(
-        "C/D FUEL ECONOMY"
-    )
+        cd_start = page_text.find(
+            "C/D FUEL ECONOMY"
+        )
 
-    epa_start = page_text.find(
-        "EPA FUEL ECONOMY"
-    )
+        epa_start = page_text.find(
+            "EPA FUEL ECONOMY"
+        )
 
-    if cd_start == -1 or epa_start == -1:
-        print("Fuel economy section missing.")
-        continue
+        if cd_start == -1 or epa_start == -1:
+            errors.append({
+                "url": url,
+                "error_type": "Missing fuel section",
+                "details": "C/D or EPA fuel economy section not found"
+            })
 
-    cd_section = page_text[
-        cd_start:epa_start
-    ]
+            continue
 
-    epa_end = page_text.find(
-        "C/D TESTING EXPLAINED",
-        epa_start
-    )
+        cd_section = page_text[
+            cd_start:epa_start
+        ]
 
-    if epa_end == -1:
-        epa_end = len(page_text)
+        epa_end = page_text.find(
+            "C/D TESTING EXPLAINED",
+            epa_start
+        )
 
-    epa_section = page_text[
-        epa_start:epa_end
-    ]
+        if epa_end == -1:
+            epa_end = len(page_text)
 
-    # Fuel data
-    fuel_data = extract_fuel_economy(
-        cd_section,
-        epa_section
-    )
+        epa_section = page_text[
+            epa_start:epa_end
+        ]
 
-    # Vehicle identity
-    vehicle_identity = extract_vehicle_identity(
-        article_data["vehicle_name"]
-    )
+        fuel_data = extract_fuel_economy(
+            cd_section,
+            epa_section
+        )
 
-    # Model / trim
-    model_data = extract_model_trim(
-        vehicle_identity["make"],
-        vehicle_identity["model_trim"],
-        model_reference
-    )
+        vehicle_identity = extract_vehicle_identity(
+            article_data["vehicle_name"]
+        )
 
-    # Build base record
-    vehicle_record = {
-        **article_data,
-        **vehicle_identity,
-        **model_data,
-        **fuel_data,
-    }
+        model_data = extract_model_trim(
+            vehicle_identity["make"],
+            vehicle_identity["model_trim"],
+            model_reference
+        )
 
-    # Metric conversions
-    metric_data = add_metric_conversions(
-        vehicle_record
-    )
+        vehicle_record = {
+            **article_data,
+            **vehicle_identity,
+            **model_data,
+            **fuel_data,
+        }
 
-    vehicle_record.update(
-        metric_data
-    )
+        metric_data = add_metric_conversions(
+            vehicle_record
+        )
 
-    records.append(
-        vehicle_record
-    )
+        vehicle_record.update(
+            metric_data
+        )
 
+        records.append(
+            vehicle_record
+        )
+
+    except Exception as error:
+
+        errors.append({
+            "url": url,
+            "error_type": type(error).__name__,
+            "details": str(error)
+        })
+
+        print("Failed:", error)
 
 # Convert all records into one DataFrame
 df = pd.DataFrame(records)
@@ -134,3 +144,19 @@ print(
     "\nSaved:",
     "data/processed/vehicle_dataset.csv"
 )
+
+error_df = pd.DataFrame(errors)
+
+error_df.to_csv(
+    "data/processed/error_log.csv",
+    index=False
+)
+
+print(
+    "Saved:",
+    "data/processed/error_log.csv"
+)
+
+print("\n--- SUMMARY ---")
+print("Successful records:", len(records))
+print("Errors:", len(errors))
